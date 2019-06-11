@@ -8,21 +8,67 @@ import {
   TouchableOpacity,
   View,
   Linking,
+  TextInput,
   Alert
 } from 'react-native';
 import { WebBrowser } from 'expo';
+import axios from '../utils/axios';
+// react-native-storage
 
 import { MonoText } from '../components/StyledText';
+
+class Test extends React.Component {
+  render() {
+    let props = this.props;
+    return (
+      <Text>{props.title} - {props.releaseYear} Year</Text>
+    )
+  }
+}
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
   };
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      text: 'Useless Placeholder',
+      list: []
+    };
+  }
+
+  async componentWillMount() {
+    const data = await axios.get('https://facebook.github.io/react-native/movies.json');
+    this.setState({
+      list: data.movies
+    })
+  }
+
   render() {
     return (
       <View style={styles.container}>
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+          <View style={styles.getStartedContainer}>
+            <TextInput style={styles.input}
+                       multiline={false}
+                       iosclearButtonMode='always'
+                       iosclearTextOnFocus={true}
+                       iosreturnKeyType='next'
+                       ioskeyboardAppearance='dark'
+                       keyboardType='email-address'
+                       returnKeyType='done'
+                       onChangeText={(text) => this.setState({text})}
+                       value={this.state.text}>
+            </TextInput>
+            <Text>{this.state.text}</Text>
+            {this.state.list.map(item => {
+              return (
+                <Test title={item.title} releaseYear={item.releaseYear} key={item.id}/>
+              )
+            })}
+          </View>
           <View style={styles.welcomeContainer}>
             <Image
               source={
@@ -53,11 +99,11 @@ export default class HomeScreen extends React.Component {
               <Text style={styles.helpLinkText}>调用APP - 微信 - 测试</Text>
             </TouchableOpacity>
           </View>
-            <View style={styles.helpContainer}>
-                <TouchableOpacity onPress={t => this._handleHelpPress('alipay://platformapi/startapp?appId=20000056')} style={styles.helpLink}>
-                    <Text style={styles.helpLinkText}>调用APP - 支付宝(支付) - 测试</Text>
-                </TouchableOpacity>
-            </View>
+          <View style={styles.helpContainer}>
+              <TouchableOpacity onPress={t => this._handleHelpPress('alipay://platformapi/startapp?appId=20000056')} style={styles.helpLink}>
+                  <Text style={styles.helpLinkText}>调用APP - 支付宝(支付) - 测试</Text>
+              </TouchableOpacity>
+          </View>
         </ScrollView>
 
         <View style={styles.tabBarInfoContainer}>
@@ -118,6 +164,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  input: {
+    width: 200,
+    height: 32,
+    borderWidth: 1,
+    marginTop: 24,
+    borderRadius: 4,
+    padding: 4,
+    borderColor: '#a8a8a8'
+  },
   developmentModeText: {
     marginBottom: 20,
     color: 'rgba(0,0,0,0.4)',
@@ -143,6 +198,7 @@ const styles = StyleSheet.create({
   getStartedContainer: {
     alignItems: 'center',
     marginHorizontal: 50,
+    flex: 1
   },
   homeScreenFilename: {
     marginVertical: 7,
